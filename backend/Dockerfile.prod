@@ -1,0 +1,39 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
+
+# system deps (psycopg2 needs libpq)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    ca-certificates \
+    curl \
+  && rm -rf /var/lib/apt/lists/*
+
+# install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+  && mv /root/.local/bin/uv /usr/local/bin/uv
+
+# copy only dependency files first (cache-friendly)
+COPY pyproject.toml /app/pyproject.toml
+COPY uv.lock /app/uv.lock
+
+# install runtime deps into /opt/venv using the lock
+RUN uv sync --frozen --no-dev
+
+# now copy the app code
+COPY app /app/app
+
+# create non-root user
+RUN useradd -m -u 10001 appuser \
+  && chown -R appuser:appuser /app /opt/venv
+USER appuser
+
+EXPOSE 8000
+
+# PROD server: no reload
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

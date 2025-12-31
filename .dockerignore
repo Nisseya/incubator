@@ -1,0 +1,40 @@
+# Node / pnpm
+node_modules
+.pnpm-store
+.pnpm-debug.log
+npm-debug.log
+yarn-error.log
+
+# SvelteKit / Vite
+.svelte-kit
+build
+dist
+.vite
+
+# Env / secrets
+!.env.example
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+
+# Logs
+*.log
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Tests / coverage
+coverage
+.nyc_output
+
+# Temporary files
+*.tmp
+*.swp
